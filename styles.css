@@ -1,7 +1,6 @@
 body {
     display: flex;
     flex-direction: column;
-    background-color: whitesmoke;
 }
 canvas {
     flex: 1;
@@ -10,14 +9,21 @@ canvas {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+    align-items: center;
 }
 
 .controls {
     display: flex;
     flex-direction: row;
+    gap: 50px;
+    align-items: center;
 }
 
 .mode {
     display: flex;
     flex-direction: column;
+}
+
+input {
+    accent-color: rgb(148, 145, 131);
 }
