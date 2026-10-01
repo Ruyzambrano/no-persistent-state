@@ -1,16 +1,29 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <title>No Persistent State</title>
         <link rel="stylesheet" href="./styles.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
-        <input type="range" id="speed-sample">
-        <label for="speed-sample">Speed of Sample</label>
-        <input type="radio" name="Mode" id="light" value="light" checked/>
-        <label for="light">Light</label>
-        <input type="radio" name="Mode" id="dark" value="dark"/>
-        <label for="dark">Dark</label>
+        <div class="header">
+            <div class="title-card">
+                <h1>No Persistent State</h1>
+                <h3>A look at the internet</h3>
+            </div>
+            <div class="controls">
+                <div class="speed">
+                    <input type="range" id="speed-sample">
+                    <label for="speed-sample">Speed of Sample</label>
+                </div>
+                <div class="mode">
+                    <input type="radio" name="Mode" id="light" value="light" checked/>
+                    <label for="light">Light</label>
+                    <input type="radio" name="Mode" id="dark" value="dark"/>
+                    <label for="dark">Dark</label>
+                </div>
+            </div>
+        </div>
         <canvas id="canvas-drawing"></canvas>
         <script src="./stream-connect.js"></script>
     </body>

@@ -50,7 +50,7 @@ function hashForColour(value, modulus, salt) {
 function tick() {
     const moment = bufferArray.pop();
     bufferArray.splice(0, bufferArray.length - MAX_BUFFER_SIZE);
-    if (moment && moment.path && moment.path.length > 1) {
+    if (moment && moment.path && moment.path.length > 2) {
         const colourHslString = generateColour(hashForColour(moment.path[moment.path.length - 1], 360, 0));
         const pointPairs = generatePoints(moment.path);
         const thickness = moment.path.length;
@@ -69,6 +69,12 @@ function generatePoints(pathArray) {
             points.push({x: hashForColour(point, canvas.width, 104729), y: hashForColour(point, canvas.height, 15485863)});
         };
     return points;
+};
+
+function quadraticLerpCalculation(start, control, end, t) {
+    const x = (((1-t)**2) * start.x) + (2*(1-t)*t * control.x) + ((t**2) *end.x);
+    const y = (((1-t)**2) * start.y) + (2*(1-t)*t * control.y) + ((t**2) * end.y);
+    return {x, y};
 };
 
 function lerpCalculation(start, end, t) {
@@ -93,9 +99,23 @@ function animateDrawing() {
         const thickness = pointDict.thickness/2;
         const segmentIndex = pointDict.segmentIndex;
         const currentPoint = pointDict.currentPoint;
-        const t = pointDict.t;
-        const nextPoint = lerpCalculation(points[segmentIndex], points[segmentIndex+1], t);
-        context.beginPath();
+        const t = pointDict.t
+        const control = points[segmentIndex+1];
+        let start;
+        if (segmentIndex === 0) {
+            start = points[0];
+        } else {
+            start = lerpCalculation(points[segmentIndex],control, 0.5);
+        };
+        let end;
+        if (segmentIndex === points.length-3) {
+            end = points[points.length - 1];
+        } else {
+            end = lerpCalculation(control, points[segmentIndex+2], 0.5);
+        };
+
+        const nextPoint = quadraticLerpCalculation(start, control, end, t);
+        context.beginPath(); 
         context.moveTo(currentPoint.x, currentPoint.y);
         context.lineTo(nextPoint.x, nextPoint.y);
         context.lineJoin = "round" ;
@@ -109,7 +129,7 @@ function animateDrawing() {
             pointDict.t = 0
         };
         pointDict.t = pointDict.t + 0.05
-        if (pointDict.segmentIndex === points.length - 1) {
+        if (pointDict.segmentIndex === points.length - 2) {
             activeStrokes.splice(i, 1);
         };
     };
