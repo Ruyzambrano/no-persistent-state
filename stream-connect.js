@@ -10,18 +10,31 @@ let speedSample = 500;
 const bufferArray = [];
 const activeStrokes = [];
 
+
 const canvas = document.getElementById("canvas-drawing");
 const context = canvas.getContext("2d");
 canvas.height = canvas.clientHeight;
 canvas.width = canvas.clientWidth;
 
-
+document.body.style.backgroundColor = "black";
+document.body.style.color = "rgb(211, 211, 211)";
 const speedElement = document.getElementById("speed-sample");
 
-speedElement.addEventListener("input", function(event) {
+speedElement.addEventListener("input", function() {
     speedSample = Number(speedElement.value) * 20;
 });
 
+const lightMode = document.getElementById("light");
+lightMode.addEventListener("input", function() {
+        document.body.style.backgroundColor = "whitesmoke";
+        document.body.style.color = "rgb(77, 76, 76)";
+});
+
+const darkMode = document.getElementById("dark");
+darkMode.addEventListener("input", function() {
+    document.body.style.backgroundColor = "black";
+    document.body.style.color = "rgb(211, 211, 211)";
+});
 
 ws.onmessage = function(event) {
     const message = JSON.parse(event.data);
@@ -84,14 +97,10 @@ function lerpCalculation(start, end, t) {
 };
 
 function animateDrawing() {
-    const lightMode = document.getElementById("light").checked;
-
-    if (lightMode) {
-        context.fillStyle = "rgba(255, 255, 255, 0.008)";
-    } else {
-        context.fillStyle = "rgba(0, 0, 0, 0.009)";
-    };
+    context.globalCompositeOperation = "destination-out";
+    context.fillStyle = "rgba(255, 255, 255, 0.008)";
     context.fillRect(0, 0, canvas.width, canvas.height);
+    context.globalCompositeOperation = "source-over";
     for (let i = activeStrokes.length-1; i >= 0; i--) {
         const pointDict = activeStrokes[i]
         const points = pointDict.points;
