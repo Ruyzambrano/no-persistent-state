@@ -11,8 +11,21 @@ const bufferArray = [];
 const activeStrokes = [];
 let playSound = false;
 let audioContext;
-const phrygianSteps = [0, 1, 3, 5, 7, 8, 10]
+const scaleSteps = {
+    ionian: [0, 2, 4, 5, 7, 9, 11],
+    dorian: [0, 2, 3, 5, 7, 9, 10],
+    phrygian: [0, 1, 3, 5, 7, 8, 10],
+    lydian: [0, 2, 4, 6, 7, 9, 11],
+    mixolydian: [0, 2, 4, 5, 7, 9, 10],
+    aeolian: [0, 2, 3, 5, 7, 8, 10],
+    locrian: [0, 1, 3, 5, 6, 8, 10]
+};
+let currentScale = scaleSteps.phrygian
 let liveUpdatePitch = false;
+const modalScale = document.getElementById("scale-mode")
+modalScale.addEventListener("change", function(){
+    currentScale = scaleSteps[modalScale.value]
+})
 
 const canvas = document.getElementById("canvas-drawing");
 const context = canvas.getContext("2d");
@@ -93,7 +106,7 @@ function convertPitch(y) {
     const remainder = ((rawStep % 12) + 12) % 12;
     let closestStep;
     let smallestDifference = 10;
-    for (const step of phrygianSteps) {
+    for (const step of currentScale) {
         const difference = Math.abs(remainder - step);
         if (difference < smallestDifference) {
             smallestDifference = difference;
