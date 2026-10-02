@@ -44,3 +44,19 @@ input {
     display: flex;
     flex-direction: column;
 }
+.github-link {
+    position: fixed;
+    bottom: 16px;
+    right: 20px;
+}
+
+.github-link a {
+    color: rgb(148, 145, 131);
+    text-decoration: none;
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+.github-link a:hover {
+    opacity: 1;
+}
