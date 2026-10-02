@@ -9,23 +9,42 @@
         <div class="header">
             <div class="title-card">
                 <h1>No Persistent State</h1>
-                <p>A look at the internet</p>
+                <p>A nervous system without body</p>
+                <p>Breath without lungs</p>
+                <p>The internet, dreaming</p>
             </div>
             <div class="controls">
-                <div class="speed">
-                    <input type="range" id="speed-sample">
-                    <label for="speed-sample">Speed of Sample</label>
-                </div>
-                <div class="mode">
-                    <div class="light-button">
-                        <input type="radio" name="Mode" id="light" value="light"/>
-                        <label for="light">Light</label>
+                <div class="visuals">
+                    <div class="speed">
+                        <input type="range" id="speed-sample">
+                        <label for="speed-sample">Speed of Sample</label>
                     </div>
-                    <div class="dark-button">
-                        <input type="radio" name="Mode" id="dark" value="dark" checked/>
-                        <label for="dark">Dark</label>
+                    <div class="mode">
+                        <div class="light-button">
+                            <input type="radio" name="Mode" id="light" value="light"/>
+                            <label for="light">Light</label>
+                        </div>
+                        <div class="dark-button">
+                            <input type="radio" name="Mode" id="dark" value="dark" checked/>
+                            <label for="dark">Dark</label>
+                        </div>
                     </div>
                 </div>
+                <div class="sound">
+                    <div class="play-sound">
+                        <input type="checkbox" name="Play sound" id="sound">
+                        <label for="sound">Play sound</label>
+                    </div>
+                    <div class="follow-pitch">
+                        <input type="radio" name="PitchMode" id="follow-pitch" value="follow"/>
+                        <label for="follow-pitch">Follow pitch</label>
+                    </div>
+                    <div class="fixed-pitch">
+                        <input type="radio" name="PitchMode" id="fixed-pitch" value="fixed" checked/>
+                        <label for="fixed-pitch">Fixed pitch</label>
+                    </div>
+                </div>
+
             </div>
         </div>
         <canvas id="canvas-drawing"></canvas>

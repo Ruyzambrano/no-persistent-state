@@ -9,7 +9,10 @@ let speedSample = 500;
 
 const bufferArray = [];
 const activeStrokes = [];
-
+let playSound = false;
+let audioContext;
+const phrygianSteps = [0, 1, 3, 5, 7, 8, 10]
+let liveUpdatePitch = false;
 
 const canvas = document.getElementById("canvas-drawing");
 const context = canvas.getContext("2d");
@@ -36,6 +39,29 @@ darkMode.addEventListener("input", function() {
     document.body.style.color = "rgb(211, 211, 211)";
 });
 
+const soundMode = document.getElementById("sound");
+soundMode.addEventListener("click", function() {
+    if (!audioContext) {
+        audioContext = new AudioContext;
+    };
+    if (soundMode.checked) {
+        playSound = true;
+        audioContext.resume();
+    } else {
+        playSound = false;
+        audioContext.suspend();
+    };
+});
+
+const followPitch = document.getElementById("follow-pitch");
+followPitch.addEventListener("input", function(){
+    liveUpdatePitch = true
+})
+const fixedPitch = document.getElementById("fixed-pitch");
+fixedPitch.addEventListener("input", function(){
+    liveUpdatePitch = false
+})
+
 ws.onmessage = function(event) {
     const message = JSON.parse(event.data);
     if (message.type === "ris_message") {
@@ -60,14 +86,94 @@ function hashForColour(value, modulus, salt) {
 
 };
 
+function convertPitch(y) {
+    const fraction = 1- (y / canvas.height);
+    const rawStep = -24 + (24 - (-24)) * fraction;
+    const octave = Math.floor(rawStep / 12);
+    const remainder = ((rawStep % 12) + 12) % 12;
+    let closestStep;
+    let smallestDifference = 10;
+    for (const step of phrygianSteps) {
+        const difference = Math.abs(remainder - step);
+        if (difference < smallestDifference) {
+            smallestDifference = difference;
+            closestStep = step;
+        }
+    };
+    const snappedStep = octave * 12 + closestStep;
+    return 440 * (2 ** (snappedStep / 12));
+};
+
+function convertPanning(x) {
+    const fraction = x / canvas.width;
+    return -1 + (1 - (-1)) * fraction;
+};
+
+function convertWaveform(colour) {
+    if (colour <= 126) {
+        return "sine";
+    } else if (colour <= 234) {
+        return "triangle";
+    } else if (colour <= 306) {
+        return "square";
+    } else {
+        return "sawtooth";
+    }
+};
+
+function convertGain(thickness) {
+    const fraction = Math.min(thickness / 20, 1);
+    return 0.02 + (0.15 - 0.02) * fraction;
+};
+
+function convertPointToTone(point, colour, thickness) {
+    const pitch = convertPitch(point.y);
+    const pan = convertPanning(point.x);
+    const waveForm = convertWaveform(colour);
+    const gain = convertGain(thickness);
+    return {pitch, pan, waveForm, gain}
+    
+};
+
+function generateTone(toneValues) {
+    const frequency = toneValues.pitch;
+    const waveForm = toneValues.waveForm;
+    const gainValue = toneValues.gain;
+    const panValue = toneValues.pan
+    const oscillator = audioContext.createOscillator();
+    oscillator.type = waveForm;
+    oscillator.frequency.value = frequency;
+
+    const gainNode = audioContext.createGain();
+    gainNode.gain.value = gainValue;
+
+    const pannerNode = audioContext.createStereoPanner();
+    pannerNode.pan.value = panValue;
+
+    oscillator.connect(gainNode);
+    gainNode.connect(pannerNode);
+    pannerNode.connect(audioContext.destination);
+    return {oscillator, gainNode, pannerNode}
+};
+
+
 function tick() {
     const moment = bufferArray.pop();
     bufferArray.splice(0, bufferArray.length - MAX_BUFFER_SIZE);
     if (moment && moment.path && moment.path.length > 2) {
-        const colourHslString = generateColour(hashForColour(moment.path[moment.path.length - 1], 360, 0));
+        const colourHash = hashForColour(moment.path[moment.path.length - 1], 360, 0);
+        const colourHslString = generateColour(colourHash);
         const pointPairs = generatePoints(moment.path);
         const thickness = moment.path.length;
-        activeStrokes.push({points: pointPairs, colour: colourHslString, segmentIndex: 0, t: 0, thickness: thickness, currentPoint: pointPairs[0]});
+        let tone;
+        if (audioContext){
+            const soundValues = convertPointToTone(pointPairs[0], colourHash, thickness);
+            tone = generateTone(soundValues);
+        };
+        if (playSound) {
+            tone.oscillator.start()
+        }
+        activeStrokes.push({points: pointPairs, colour: colourHslString, segmentIndex: 0, t: 0, thickness: thickness, currentPoint: pointPairs[0], colourHash: colourHash, tone: tone, hasStarted: playSound});
     };
     setTimeout(tick, speedSample+20);
 };
@@ -140,6 +246,15 @@ function animateDrawing() {
         pointDict.t = pointDict.t + 0.05
         if (pointDict.segmentIndex === points.length - 2) {
             activeStrokes.splice(i, 1);
+            if (pointDict.hasStarted) {
+                pointDict.tone.oscillator.stop()
+            }
+        };
+        if (pointDict.tone) {
+            pointDict.tone.pannerNode.pan.value = convertPanning(currentPoint.x);
+            if (liveUpdatePitch) {
+                pointDict.tone.oscillator.frequency.value = convertPitch(currentPoint.y);
+            };
         };
     };
     requestAnimationFrame(animateDrawing);
