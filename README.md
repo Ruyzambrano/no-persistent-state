@@ -67,7 +67,9 @@ Strokes are drawn as a chain of quadratic Bezier curves. Each hop is a control p
 
 ### Fading
 
-The canvas is never cleared. Every frame it draws a near-transparent rectangle using `destination-out` compositing, which lowers the alpha of existing pixels. Old strokes fade to transparent, so this works the same on either background.
+The canvas is never cleared. Every frame it draws a near-transparent rectangle using `destination-out` compositing, which lowers the alpha of existing pixels. Because the canvas stores alpha as whole numbers, the fade stalls at about 25% opacity, so old strokes leave a faint ghost that builds up over time. That's kept on purpose. The fade works the same on either background, and Clear canvas wipes the ghosts.
+
+The canvas is sized to the window and scaled by `devicePixelRatio`, so lines stay sharp on high-resolution screens. Resizing the window keeps the drawing and stretches it to the new size. A snapshot is taken at the start of a resize and reused until the window has been still for 250ms, so dragging the window edge doesn't blur the image through repeated rescaling.
 
 ### Sound
 

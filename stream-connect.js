@@ -33,8 +33,44 @@ modalScale.addEventListener("change", function(){
 
 const canvas = document.getElementById("canvas-drawing");
 const context = canvas.getContext("2d");
-canvas.height = canvas.clientHeight;
-canvas.width = canvas.clientWidth;
+const RESIZE_SETTLE_DELAY = 250;
+let canvasWidth;
+let canvasHeight;
+let resizeSnapshot;
+let resizeSettleTimer;
+
+function takeSnapshot() {
+    const snapshot = document.createElement("canvas");
+    snapshot.width = canvas.width;
+    snapshot.height = canvas.height;
+    snapshot.getContext("2d").drawImage(canvas, 0, 0);
+    return snapshot;
+};
+
+function resizeCanvas() {
+    if (!resizeSnapshot && canvas.width > 0 && canvas.height > 0) {
+        resizeSnapshot = takeSnapshot();
+    };
+
+    const dpr = window.devicePixelRatio || 1;
+    canvasWidth = canvas.clientWidth;
+    canvasHeight = canvas.clientHeight;
+    canvas.width = Math.round(canvasWidth * dpr);
+    canvas.height = Math.round(canvasHeight * dpr);
+    context.scale(dpr, dpr);
+
+    if (resizeSnapshot) {
+        context.drawImage(resizeSnapshot, 0, 0, canvasWidth, canvasHeight);
+    };
+
+    clearTimeout(resizeSettleTimer);
+    resizeSettleTimer = setTimeout(function() {
+        resizeSnapshot = undefined;
+    }, RESIZE_SETTLE_DELAY);
+};
+
+resizeCanvas();
+new ResizeObserver(resizeCanvas).observe(canvas);
 
 document.body.style.backgroundColor = "black";
 document.body.style.color = "rgb(211, 211, 211)";
@@ -87,7 +123,7 @@ clearButton.addEventListener("click", function() {
         };
     };
     activeStrokes.length = 0;
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.clearRect(0, 0, canvasWidth, canvasHeight);
 });
 
 function sendMessage(type, data) {
@@ -142,7 +178,7 @@ function hashForColour(value, modulus, salt) {
 };
 
 function convertPitch(y) {
-    const fraction = 1- (y / canvas.height);
+    const fraction = 1- (y / canvasHeight);
     const rawStep = -24 + (24 - (-24)) * fraction;
     const octave = Math.floor(rawStep / 12);
     const remainder = ((rawStep % 12) + 12) % 12;
@@ -160,7 +196,7 @@ function convertPitch(y) {
 };
 
 function convertPanning(x) {
-    const fraction = x / canvas.width;
+    const fraction = x / canvasWidth;
     return -1 + (1 - (-1)) * fraction;
 };
 
@@ -240,7 +276,7 @@ function generateColour(value) {
 function generatePoints(pathArray) {
     const points = [];
     for (const point of pathArray) {
-            points.push({x: hashForColour(point, canvas.width, 104729), y: hashForColour(point, canvas.height, 15485863)});
+            points.push({x: hashForColour(point, canvasWidth, 104729), y: hashForColour(point, canvasHeight, 15485863)});
         };
     return points;
 };
@@ -260,7 +296,7 @@ function lerpCalculation(start, end, t) {
 function animateDrawing() {
     context.globalCompositeOperation = "destination-out";
     context.fillStyle = "rgba(255, 255, 255, 0.008)";
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillRect(0, 0, canvasWidth, canvasHeight);
     context.globalCompositeOperation = "source-over";
     for (let i = activeStrokes.length-1; i >= 0; i--) {
         const pointDict = activeStrokes[i]
