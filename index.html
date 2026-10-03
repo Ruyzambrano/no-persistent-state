@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-GB">
     <head>
         <meta charset="utf-8">
-        <title>No Persistent State</title>
-        <link rel="stylesheet" href="./styles.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>No Persistent State</title>
+        <meta name="description" content="Live BGP routing updates from RIPE NCC's RIS Live feed, drawn as fading brushstrokes with optional generative sound.">
+
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://ruyzambrano.github.io/no-persistent-state/">
+        <meta property="og:title" content="No Persistent State">
+        <meta property="og:description" content="The internet, dreaming. Live BGP routing updates drawn as fading brushstrokes.">
+        <meta property="og:image" content="https://ruyzambrano.github.io/no-persistent-state/preview.png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="Coloured curved strokes fading on a black canvas">
+        <meta name="twitter:card" content="summary_large_image">
+
+        <link rel="stylesheet" href="./styles.css">
     </head>
     <body>
         <div class="header">
@@ -76,7 +88,7 @@
             </div>
         </div>
         <canvas id="canvas-drawing"></canvas>
-        <script src="./stream-connect.js"></script>
+        <script type="module" src="./src/main.js"></script>
         <div class="github-link">
             <a href="https://www.github.com/ruyzambrano/no-persistent-state">View on Github</a>
         </div>

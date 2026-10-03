@@ -1,16 +1,30 @@
 # No Persistent State
 
-A live visualisation of BGP routing updates from RIPE NCC's [RIS Live](https://ris-live.ripe.net/) feed. Each route announcement is drawn as a stroke on a canvas and then fades out. Nothing is stored or replayed.
+[![Tests](https://github.com/ruyzambrano/no-persistent-state/actions/workflows/test.yml/badge.svg)](https://github.com/ruyzambrano/no-persistent-state/actions/workflows/test.yml)
+
+A live visualisation of BGP routing updates from RIPE NCC's [RIS Live](https://ris-live.ripe.net/) feed. Each route announcement is drawn as a stroke on a canvas and then fades to a faint ghost. No data is stored or replayed.
 
 **Live:** https://ruyzambrano.github.io/no-persistent-state/
 
+![Coloured curved strokes drawing and fading on a black canvas](preview.gif)
+
 ## Running locally
 
-There's no build step and there are no dependencies. Open `index.html` in a browser, or serve the folder with any static file server:
+There's no build step and there are no dependencies. The JavaScript uses ES modules, which browsers won't load from `file://`, so serve the folder with any static file server and open http://localhost:8000:
 
 ```
 python -m http.server
 ```
+
+## Tests
+
+The pure logic (hashing, curve geometry, sound mapping and the RIS Live subscription handling) is unit tested with Node's built-in test runner, so there's nothing to install. Requires Node 22 or later.
+
+```
+npm test
+```
+
+Tests run on every push and pull request via GitHub Actions, on Node 22 and 24.
 
 ## Stack
 
@@ -55,7 +69,7 @@ Incoming `ris_message` events go into a buffer capped at the 500 most recent. On
 
 ### Colour and position
 
-Each AS number is hashed to a fixed hue and a fixed canvas position, so the same network always appears in the same place and colour. The hash function runs three times with different salts to get hue, x and y, which stops the three values correlating with each other.
+Each AS number is hashed to a fixed hue and a fixed canvas position, so the same network always gets the same colour and, for a given window size, the same position. Positions are worked out as a remainder of the canvas width and height, so resizing the window moves every network to a new spot. The hash function runs three times with different salts to get hue, x and y, which stops the three values correlating with each other.
 
 - **Hue** comes from the last ASN in the path (the origin network).
 - **Points** along the stroke are the positions of each ASN in the path.
@@ -86,7 +100,21 @@ Strokes that start while sound is off stay silent; nothing is queued.
 
 ## Repo contents
 
-- `index.html`, `styles.css`, `stream-connect.js`: the site
+```
+index.html, styles.css    page and layout
+preview.gif, preview.png  README animation and link-preview image
+package.json              npm test script (no dependencies)
+src/
+  main.js                 wires up the controls, buffer and animation loop
+  stream.js               RIS Live connection, subscriptions and reconnects
+  canvas.js               canvas sizing, high-DPI scaling and resize handling
+  hash.js                 ASN to colour and position
+  geometry.js             Bezier curve segments
+  sound.js                position, colour and path length to pitch, pan, waveform and gain
+test/                     unit tests for the modules above
+.github/workflows/        CI
+```
+
 - `subscribe.py`, `stream.ipynb`, `requirements.txt`: Python scripts I used to explore the RIS Live feed before building the site. The site doesn't need them.
 
 ## Credit
