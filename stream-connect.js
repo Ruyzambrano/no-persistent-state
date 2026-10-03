@@ -1,9 +1,12 @@
 const MAX_BUFFER_SIZE = 500
 
-const ws = new WebSocket("wss://ris-live.ripe.net/v1/ws/?client=js-example-1");
+const RIS_LIVE_URL = "wss://ris-live.ripe.net/v1/ws/?client=js-example-1";
+const INITIAL_RECONNECT_DELAY = 1000;
+const MAX_RECONNECT_DELAY = 30000;
 const params = {
     host: "rrc21",
 };
+let reconnectDelay = INITIAL_RECONNECT_DELAY;
 
 let speedSample = 500;
 
@@ -75,18 +78,33 @@ fixedPitch.addEventListener("input", function(){
     liveUpdatePitch = false
 })
 
-ws.onmessage = function(event) {
-    const message = JSON.parse(event.data);
-    if (message.type === "ris_message") {
-        bufferArray.push(message.data)
-    }
-};
+function connect() {
+    const ws = new WebSocket(RIS_LIVE_URL);
 
-ws.onopen = function(event) {
-    ws.send(JSON.stringify({
-        type: "ris_subscribe",
-        data: params
-    }));
+    ws.onopen = function() {
+        reconnectDelay = INITIAL_RECONNECT_DELAY;
+        ws.send(JSON.stringify({
+            type: "ris_subscribe",
+            data: params
+        }));
+    };
+
+    ws.onmessage = function(event) {
+        const message = JSON.parse(event.data);
+        if (message.type === "ris_message") {
+            bufferArray.push(message.data)
+        }
+    };
+
+    ws.onerror = function(event) {
+        console.error("RIS Live websocket error", event);
+    };
+
+    ws.onclose = function(event) {
+        console.warn(`RIS Live connection closed (code ${event.code}), retrying in ${reconnectDelay / 1000}s`);
+        setTimeout(connect, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);
+    };
 };
 
 function hashForColour(value, modulus, salt) {
@@ -273,5 +291,6 @@ function animateDrawing() {
     requestAnimationFrame(animateDrawing);
 };
 
+connect();
 tick();
 animateDrawing();
