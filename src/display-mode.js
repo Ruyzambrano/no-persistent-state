@@ -1,6 +1,6 @@
 const TOGGLE_KEY = "f";
 const DISPLAY_MODE_CLASS = "display-mode";
-const TYPING_TARGETS = "select, textarea, input[type='text']";
+const IGNORED_TARGETS = "select, textarea, input[type='text'], dialog";
 
 export function setUpDisplayMode(button) {
     const body = document.body;
@@ -36,7 +36,7 @@ export function setUpDisplayMode(button) {
     button.addEventListener("click", toggle);
 
     document.addEventListener("keydown", function(event) {
-        if (event.metaKey || event.ctrlKey || event.altKey || event.target.closest(TYPING_TARGETS)) {
+        if (event.metaKey || event.ctrlKey || event.altKey || event.target.closest(IGNORED_TARGETS)) {
             return;
         };
         if (event.key.toLowerCase() === TOGGLE_KEY) {

@@ -42,6 +42,7 @@ Tests run on every push and pull request via GitHub Actions, on Node 22 and 24.
 | Light / Dark | Page background colour |
 | Clear canvas | Wipes the canvas and stops any strokes still drawing |
 | Full Screen (or press F) | Hides the controls and goes fullscreen. Press F or Esc to exit |
+| What am I looking at? | Opens a short plain-English explanation of the piece |
 | Play sound | Turns audio on or off |
 | Modal scale | Musical scale that pitches are snapped to (default Phrygian) |
 | Follow pitch / Fixed pitch | Whether a stroke's pitch changes as it draws or stays on its starting note |
@@ -103,6 +104,10 @@ Strokes that start while sound is off stay silent; nothing is queued.
 
 If the operating system's "reduce motion" setting is on, new strokes start four times less often and draw at half speed. The page picks up a change to the setting without a reload.
 
+### Phones
+
+Below 700px wide, the controls fold away behind a Settings button and open as an overlay on top of the canvas. Because the overlay sits on top, opening it doesn't resize the canvas or move the networks.
+
 ### Full screen
 
 Full Screen hides the controls and the cursor and requests fullscreen. If the browser refuses fullscreen (some mobile browsers do), the controls are still hidden. Leaving fullscreen by any route brings the controls back. The canvas grows to fill the space the controls used, so networks move to new positions, as with any resize.
@@ -112,6 +117,7 @@ Full Screen hides the controls and the cursor and requests fullscreen. If the br
 ```
 index.html, styles.css    page and layout
 preview.gif, preview.png  README animation and link-preview image
+favicon.svg, favicon-32.png, apple-touch-icon.png  site icons
 package.json              npm test script (no dependencies)
 src/
   main.js                 wires up the controls, buffer and animation loop
@@ -119,6 +125,7 @@ src/
   canvas.js               canvas sizing, high-DPI scaling and resize handling
   display-mode.js         fullscreen with controls hidden
   pacing.js               stroke timing, including reduced motion
+  panels.js               phone settings toggle and the About dialog
   hash.js                 ASN to colour and position
   geometry.js             Bezier curve segments
   sound.js                position, colour and path length to pitch, pan, waveform and gain

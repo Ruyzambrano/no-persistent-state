@@ -3,6 +3,7 @@ import {setUpDisplayMode} from "./display-mode.js";
 import {segmentEndpoints, quadraticBezier} from "./geometry.js";
 import {hashForColour, generateColour, generatePoints} from "./hash.js";
 import {sampleDelay, drawStep} from "./pacing.js";
+import {setUpAboutDialog, setUpSettingsToggle} from "./panels.js";
 import {SCALES, convertPitch, convertPanning, convertWaveform, convertGain, createTone} from "./sound.js";
 import {createRisStream} from "./stream.js";
 
@@ -38,22 +39,19 @@ modalScale.addEventListener("change", function() {
     currentScale = SCALES[modalScale.value];
 });
 
-document.body.style.backgroundColor = "black";
-document.body.style.color = "rgb(211, 211, 211)";
-
 const speedElement = document.getElementById("speed-sample");
 
 setUpDisplayMode(document.getElementById("display-mode"));
+setUpSettingsToggle(document.getElementById("settings-toggle"));
+setUpAboutDialog(document.getElementById("about-open"), document.getElementById("about"));
 
-document.getElementById("light").addEventListener("input", function() {
-    document.body.style.backgroundColor = "whitesmoke";
-    document.body.style.color = "rgb(77, 76, 76)";
-});
-
-document.getElementById("dark").addEventListener("input", function() {
-    document.body.style.backgroundColor = "black";
-    document.body.style.color = "rgb(211, 211, 211)";
-});
+const lightMode = document.getElementById("light");
+document.body.classList.toggle("light", lightMode.checked);
+for (const radio of document.querySelectorAll("input[name='Mode']")) {
+    radio.addEventListener("change", function() {
+        document.body.classList.toggle("light", lightMode.checked);
+    });
+};
 
 const soundMode = document.getElementById("sound");
 soundMode.addEventListener("click", function() {
