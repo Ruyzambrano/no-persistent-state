@@ -29,7 +29,7 @@
             <div class="controls">
                 <div class="visuals">
                     <div class="speed">
-                        <input type="range" id="speed-sample">
+                        <input type="range" id="speed-sample" min="0" max="100" value="75">
                         <label for="speed-sample">Speed of Sample</label>
                     </div>
                     <div class="collector">
@@ -57,6 +57,7 @@
                         </div>
                     </div>
                     <button type="button" id="clear-canvas">Clear canvas</button>
+                    <button type="button" id="display-mode" title="Hide controls and go fullscreen. Press F or Esc to exit.">Full Screen (F)</button>
                 </div>
                 <div class="sound">
                     <div class="play-sound">

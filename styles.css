@@ -68,3 +68,12 @@ input {
 .github-link a:hover {
     opacity: 1;
 }
+
+body.display-mode {
+    cursor: none;
+}
+
+body.display-mode .header,
+body.display-mode .github-link {
+    display: none;
+}

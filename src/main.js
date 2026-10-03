@@ -1,17 +1,18 @@
 import {createResponsiveCanvas} from "./canvas.js";
+import {setUpDisplayMode} from "./display-mode.js";
 import {segmentEndpoints, quadraticBezier} from "./geometry.js";
 import {hashForColour, generateColour, generatePoints} from "./hash.js";
+import {sampleDelay, drawStep} from "./pacing.js";
 import {SCALES, convertPitch, convertPanning, convertWaveform, convertGain, createTone} from "./sound.js";
 import {createRisStream} from "./stream.js";
 
 const MAX_BUFFER_SIZE = 500;
 const MIN_PATH_LENGTH = 3;
-const T_STEP = 0.05;
 const FADE_STYLE = "rgba(255, 255, 255, 0.008)";
 
 const bufferArray = [];
 const activeStrokes = [];
-let speedSample = 500;
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let playSound = false;
 let liveUpdatePitch = false;
 let currentScale = SCALES.phrygian;
@@ -41,9 +42,8 @@ document.body.style.backgroundColor = "black";
 document.body.style.color = "rgb(211, 211, 211)";
 
 const speedElement = document.getElementById("speed-sample");
-speedElement.addEventListener("input", function() {
-    speedSample = Number(speedElement.value) * 20;
-});
+
+setUpDisplayMode(document.getElementById("display-mode"));
 
 document.getElementById("light").addEventListener("input", function() {
     document.body.style.backgroundColor = "whitesmoke";
@@ -117,7 +117,7 @@ function tick() {
             hasStarted: playSound
         });
     };
-    setTimeout(tick, speedSample + 20);
+    setTimeout(tick, sampleDelay(Number(speedElement.value), reducedMotion.matches));
 };
 
 function drawStroke(stroke) {
@@ -141,7 +141,7 @@ function advanceStroke(stroke) {
         stroke.segmentIndex++;
         stroke.t = 0;
     };
-    stroke.t += T_STEP;
+    stroke.t += drawStep(reducedMotion.matches);
     if (stroke.tone) {
         stroke.tone.pannerNode.pan.value = convertPanning(previousPoint.x, size.width);
         if (liveUpdatePitch) {

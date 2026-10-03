@@ -27,6 +27,31 @@ test("convertPitch always lands on a note in the selected scale", () => {
     };
 });
 
+function yForSemitones(semitones) {
+    return HEIGHT * (1 - (semitones + 24) / 48);
+};
+
+test("convertPitch rounds up to the next octave's root when it is nearer", () => {
+    assert.equal(semitonesFromA440(convertPitch(yForSemitones(11.9), HEIGHT, SCALES.phrygian)), 12);
+    assert.equal(semitonesFromA440(convertPitch(yForSemitones(-0.1), HEIGHT, SCALES.phrygian)), 0);
+});
+
+test("convertPitch picks the nearest note in the scale", () => {
+    for (const [name, scale] of Object.entries(SCALES)) {
+        const scaleNotes = [];
+        for (let octave = -3; octave <= 2; octave++) {
+            for (const step of scale) {
+                scaleNotes.push(octave * 12 + step);
+            };
+        };
+        for (let raw = -24; raw <= 24; raw += 0.13) {
+            const snapped = semitonesFromA440(convertPitch(yForSemitones(raw), HEIGHT, scale));
+            const nearest = Math.min(...scaleNotes.map((note) => Math.abs(note - raw)));
+            assert.ok(Math.abs(Math.abs(snapped - raw) - nearest) < 1e-9, `${name}: ${raw.toFixed(2)} snapped to ${snapped}`);
+        };
+    };
+});
+
 test("convertPanning maps left edge to -1, centre to 0 and right edge to 1", () => {
     assert.equal(convertPanning(0, 800), -1);
     assert.equal(convertPanning(400, 800), 0);

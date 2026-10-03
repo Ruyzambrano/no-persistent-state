@@ -18,7 +18,7 @@ python -m http.server
 
 ## Tests
 
-The pure logic (hashing, curve geometry, sound mapping and the RIS Live subscription handling) is unit tested with Node's built-in test runner, so there's nothing to install. Requires Node 22 or later.
+The pure logic (hashing, curve geometry, sound mapping, stroke timing and the RIS Live subscription handling) is unit tested with Node's built-in test runner, so there's nothing to install. Requires Node 22 or later.
 
 ```
 npm test
@@ -37,10 +37,11 @@ Tests run on every push and pull request via GitHub Actions, on Node 22 and 24.
 
 | Control | Effect |
 |---|---|
-| Collector | Which RIS route collector to listen to (default Paris) |
-| Speed of sample | Delay between new strokes (higher is slower) |
+| Collector | Which RIS route collector to listen to (default London) |
+| Speed of sample | How often a new stroke starts, from every 2s (left) to every 20ms (right) |
 | Light / Dark | Page background colour |
 | Clear canvas | Wipes the canvas and stops any strokes still drawing |
+| Full Screen (or press F) | Hides the controls and goes fullscreen. Press F or Esc to exit |
 | Play sound | Turns audio on or off |
 | Modal scale | Musical scale that pitches are snapped to (default Phrygian) |
 | Follow pitch / Fixed pitch | Whether a stroke's pitch changes as it draws or stays on its starting note |
@@ -49,12 +50,12 @@ Tests run on every push and pull request via GitHub Actions, on Node 22 and 24.
 
 ### Data
 
-The page subscribes to one RIS Live collector at a time over `wss://ris-live.ripe.net/v1/ws/`. The default is `rrc21` (Paris). The collector picker offers one per region:
+The page subscribes to one RIS Live collector at a time over `wss://ris-live.ripe.net/v1/ws/`. The default is `rrc01` (London). The collector picker offers one per region:
 
 | Option | Collector | Type |
 |---|---|---|
-| Paris | `rrc21` | IXP (France-IX) |
 | London | `rrc01` | IXP (LINX, LONAP) |
+| Paris | `rrc21` | IXP (France-IX) |
 | New York | `rrc11` | IXP (NYIIX) |
 | São Paulo | `rrc15` | IXP (IX.br) |
 | Johannesburg | `rrc19` | IXP (NAP Africa) |
@@ -91,12 +92,20 @@ Sound is off by default; browsers require a click before audio can play. When it
 
 | Parameter | Source | Mapping |
 |---|---|---|
-| Pitch | y-position | ±2 octaves around A440, snapped to the selected scale |
+| Pitch | y-position | ±2 octaves around A440, snapped to the nearest note in the selected scale |
 | Pan | x-position | Linear, left to right |
 | Waveform | Hue | Sine, triangle, square or sawtooth by hue range |
 | Gain | Path length | 0.02 to 0.15, kept low because overlapping strokes add up |
 
 Strokes that start while sound is off stay silent; nothing is queued.
+
+### Reduced motion
+
+If the operating system's "reduce motion" setting is on, new strokes start four times less often and draw at half speed. The page picks up a change to the setting without a reload.
+
+### Full screen
+
+Full Screen hides the controls and the cursor and requests fullscreen. If the browser refuses fullscreen (some mobile browsers do), the controls are still hidden. Leaving fullscreen by any route brings the controls back. The canvas grows to fill the space the controls used, so networks move to new positions, as with any resize.
 
 ## Repo contents
 
@@ -108,6 +117,8 @@ src/
   main.js                 wires up the controls, buffer and animation loop
   stream.js               RIS Live connection, subscriptions and reconnects
   canvas.js               canvas sizing, high-DPI scaling and resize handling
+  display-mode.js         fullscreen with controls hidden
+  pacing.js               stroke timing, including reduced motion
   hash.js                 ASN to colour and position
   geometry.js             Bezier curve segments
   sound.js                position, colour and path length to pitch, pan, waveform and gain

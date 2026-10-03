@@ -21,7 +21,7 @@ export function convertPitch(y, height, scale) {
     const remainder = ((rawStep % 12) + 12) % 12;
     let closestStep;
     let smallestDifference = Infinity;
-    for (const step of scale) {
+    for (const step of [...scale, 12]) {
         const difference = Math.abs(remainder - step);
         if (difference < smallestDifference) {
             smallestDifference = difference;
