@@ -41,7 +41,7 @@ modalScale.addEventListener("change", function() {
 
 const speedElement = document.getElementById("speed-sample");
 
-setUpDisplayMode(document.getElementById("display-mode"));
+setUpDisplayMode(document.getElementById("display-mode"), document.getElementById("canvas-drawing"));
 setUpSettingsToggle(document.getElementById("settings-toggle"));
 setUpAboutDialog(document.getElementById("about-open"), document.getElementById("about"));
 

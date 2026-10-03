@@ -2,7 +2,7 @@ const TOGGLE_KEY = "f";
 const DISPLAY_MODE_CLASS = "display-mode";
 const IGNORED_TARGETS = "select, textarea, input[type='text'], dialog";
 
-export function setUpDisplayMode(button) {
+export function setUpDisplayMode(button, canvas) {
     const body = document.body;
 
     function isActive() {
@@ -34,6 +34,12 @@ export function setUpDisplayMode(button) {
     };
 
     button.addEventListener("click", toggle);
+
+    canvas.addEventListener("click", function() {
+        if (isActive()) {
+            exit();
+        };
+    });
 
     document.addEventListener("keydown", function(event) {
         if (event.metaKey || event.ctrlKey || event.altKey || event.target.closest(IGNORED_TARGETS)) {

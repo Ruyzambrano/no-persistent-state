@@ -41,7 +41,7 @@ Tests run on every push and pull request via GitHub Actions, on Node 22 and 24.
 | Speed of sample | How often a new stroke starts, from every 2s (left) to every 20ms (right) |
 | Light / Dark | Page background colour |
 | Clear canvas | Wipes the canvas and stops any strokes still drawing |
-| Full Screen (or press F) | Hides the controls and goes fullscreen. Press F or Esc to exit |
+| Full Screen (or press F) | Hides the controls and goes fullscreen. Tap or click anywhere, or press F or Esc, to exit |
 | What am I looking at? | Opens a short plain-English explanation of the piece |
 | Play sound | Turns audio on or off |
 | Modal scale | Musical scale that pitches are snapped to (default Phrygian) |
@@ -110,7 +110,7 @@ Below 700px wide, the controls fold away behind a Settings button and open as an
 
 ### Full screen
 
-Full Screen hides the controls and the cursor and requests fullscreen. If the browser refuses fullscreen (some mobile browsers do), the controls are still hidden. Leaving fullscreen by any route brings the controls back. The canvas grows to fill the space the controls used, so networks move to new positions, as with any resize.
+Full Screen hides the controls and the cursor and requests fullscreen. If the browser refuses fullscreen (iPhone Safari does), the controls are still hidden. A hint at the bottom says how to exit, then fades after a few seconds. Tapping or clicking anywhere on the canvas exits, so phones without a keyboard always have a way out. Leaving fullscreen by any route brings the controls back. The canvas grows to fill the space the controls used, so networks move to new positions, as with any resize.
 
 ## Repo contents
 
