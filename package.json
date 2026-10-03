@@ -1,0 +1,14 @@
+{
+  "name": "no-persistent-state",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A live visualisation of BGP routing updates from RIPE NCC's RIS Live feed",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}
