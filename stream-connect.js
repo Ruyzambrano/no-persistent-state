@@ -1,12 +1,13 @@
 const MAX_BUFFER_SIZE = 500
 
-const RIS_LIVE_URL = "wss://ris-live.ripe.net/v1/ws/?client=js-example-1";
+const RIS_LIVE_URL = "wss://ris-live.ripe.net/v1/ws/?client=no-persistent-state";
 const INITIAL_RECONNECT_DELAY = 1000;
 const MAX_RECONNECT_DELAY = 30000;
-const params = {
-    host: "rrc21",
-};
 let reconnectDelay = INITIAL_RECONNECT_DELAY;
+let socket;
+
+const collectorSelect = document.getElementById("collector");
+let currentCollector = collectorSelect.value;
 
 let speedSample = 500;
 
@@ -78,29 +79,52 @@ fixedPitch.addEventListener("input", function(){
     liveUpdatePitch = false
 })
 
+const clearButton = document.getElementById("clear-canvas");
+clearButton.addEventListener("click", function() {
+    for (const stroke of activeStrokes) {
+        if (stroke.hasStarted) {
+            stroke.tone.oscillator.stop();
+        };
+    };
+    activeStrokes.length = 0;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+});
+
+function sendMessage(type, data) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({type, data}));
+    };
+};
+
+collectorSelect.addEventListener("change", function() {
+    sendMessage("ris_unsubscribe", {host: currentCollector});
+    currentCollector = collectorSelect.value;
+    bufferArray.length = 0;
+    sendMessage("ris_subscribe", {host: currentCollector});
+});
+
 function connect() {
-    const ws = new WebSocket(RIS_LIVE_URL);
+    socket = new WebSocket(RIS_LIVE_URL);
 
-    ws.onopen = function() {
+    socket.onopen = function() {
         reconnectDelay = INITIAL_RECONNECT_DELAY;
-        ws.send(JSON.stringify({
-            type: "ris_subscribe",
-            data: params
-        }));
+        sendMessage("ris_subscribe", {host: currentCollector});
     };
 
-    ws.onmessage = function(event) {
+    socket.onmessage = function(event) {
         const message = JSON.parse(event.data);
-        if (message.type === "ris_message") {
-            bufferArray.push(message.data)
-        }
+        if (message.type === "ris_message" && message.data.host.split(".")[0] === currentCollector) {
+            bufferArray.push(message.data);
+        } else if (message.type === "ris_error") {
+            console.error("RIS Live error:", message.data.message);
+        };
     };
 
-    ws.onerror = function(event) {
+    socket.onerror = function(event) {
         console.error("RIS Live websocket error", event);
     };
 
-    ws.onclose = function(event) {
+    socket.onclose = function(event) {
         console.warn(`RIS Live connection closed (code ${event.code}), retrying in ${reconnectDelay / 1000}s`);
         setTimeout(connect, reconnectDelay);
         reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);

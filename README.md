@@ -23,8 +23,10 @@ python -m http.server
 
 | Control | Effect |
 |---|---|
+| Collector | Which RIS route collector to listen to (default Paris) |
 | Speed of sample | Delay between new strokes (higher is slower) |
 | Light / Dark | Page background colour |
+| Clear canvas | Wipes the canvas and stops any strokes still drawing |
 | Play sound | Turns audio on or off |
 | Modal scale | Musical scale that pitches are snapped to (default Phrygian) |
 | Follow pitch / Fixed pitch | Whether a stroke's pitch changes as it draws or stays on its starting note |
@@ -33,7 +35,23 @@ python -m http.server
 
 ### Data
 
-The page subscribes to a single RIS Live collector, `rrc21`, at `wss://ris-live.ripe.net/v1/ws/`. Incoming `ris_message` events go into a buffer capped at the 500 most recent. On each tick, the newest message is taken and its AS path is drawn, as long as the path has more than two hops. If the connection drops, it reconnects with exponential backoff (1s doubling up to 30s).
+The page subscribes to one RIS Live collector at a time over `wss://ris-live.ripe.net/v1/ws/`. The default is `rrc21` (Paris). The collector picker offers one per region:
+
+| Option | Collector | Type |
+|---|---|---|
+| Paris | `rrc21` | IXP (France-IX) |
+| London | `rrc01` | IXP (LINX, LONAP) |
+| New York | `rrc11` | IXP (NYIIX) |
+| São Paulo | `rrc15` | IXP (IX.br) |
+| Johannesburg | `rrc19` | IXP (NAP Africa) |
+| Dubai | `rrc26` | IXP (UAE-IX) |
+| Tokyo | `rrc06` | IXP (DIX-IE, JPIX) |
+| Singapore | `rrc23` | IXP (Equinix) |
+| Global | `rrc00` | Multihop, peers worldwide |
+
+Switching collector unsubscribes and resubscribes on the same socket, and clears the buffer so strokes from the old collector don't carry over. The full list of collectors is in the [RIS docs](https://ris.ripe.net/docs/route-collectors/).
+
+Incoming `ris_message` events go into a buffer capped at the 500 most recent. On each tick, the newest message is taken and its AS path is drawn, as long as the path has more than two hops. If the connection drops, it reconnects with exponential backoff (1s doubling up to 30s).
 
 ### Colour and position
 

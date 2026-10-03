@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
         <title>No Persistent State</title>
         <link rel="stylesheet" href="./styles.css">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,6 +20,20 @@
                         <input type="range" id="speed-sample">
                         <label for="speed-sample">Speed of Sample</label>
                     </div>
+                    <div class="collector">
+                        <label for="collector">Collector: </label>
+                        <select id="collector">
+                            <option value="rrc21" selected>Paris</option>
+                            <option value="rrc01">London</option>
+                            <option value="rrc11">New York</option>
+                            <option value="rrc15">São Paulo</option>
+                            <option value="rrc19">Johannesburg</option>
+                            <option value="rrc26">Dubai</option>
+                            <option value="rrc06">Tokyo</option>
+                            <option value="rrc23">Singapore</option>
+                            <option value="rrc00">Global</option>
+                        </select>
+                    </div>
                     <div class="mode">
                         <div class="light-button">
                             <input type="radio" name="Mode" id="light" value="light"/>
@@ -29,6 +44,7 @@
                             <label for="dark">Dark</label>
                         </div>
                     </div>
+                    <button type="button" id="clear-canvas">Clear canvas</button>
                 </div>
                 <div class="sound">
                     <div class="play-sound">
