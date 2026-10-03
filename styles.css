@@ -122,6 +122,12 @@ dialog::backdrop {
     right: 20px;
 }
 
+.github-link span {
+    color: var(--muted);
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
 .github-link a {
     color: var(--muted);
     text-decoration: none;
